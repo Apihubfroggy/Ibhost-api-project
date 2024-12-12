@@ -3,6 +3,7 @@ const axios = require("axios");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const FormData = require("form-data");
 
 const app = express();
 const port = 3000;
@@ -25,16 +26,15 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     // Convert file to base64
     const base64Image = fs.readFileSync(filePath, { encoding: "base64" });
 
+    // Prepare form data
+    const formData = new FormData();
+    formData.append("image", base64Image);
+
     // Send request to imgbb API
     const response = await axios.post(
-      `https://api.imgbb.com/1/upload`,
-      null,
-      {
-        params: {
-          key: apiKey,
-          image: base64Image,
-        },
-      }
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      formData,
+      { headers: formData.getHeaders() }
     );
 
     // Delete the uploaded file after sending to the API
